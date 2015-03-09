@@ -39,11 +39,16 @@ int recvInt() {
 
 //Maybe throw exception
 int recvIntParameters() {
+		//Check code??
+	int code = recvCode();
 	return recvInt();	
 }
 
 //throw excep?
 std::string recvStringParameter() {
+
+	//Check code??
+	int code = recvCode();
 	int n = recvInt();
 	string parameter = "";
 	for (int i = 0; i < n; i++) {

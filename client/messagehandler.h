@@ -1,26 +1,29 @@
-#ifdef MESSAGE_HANDLER_H
+#ifndef MESSAGE_HANDLER_H
 #define MESSAGE_HANDLER_H
 
 #include <string>
 #include "connection.h"
 #include "protocol.h"
+#include <memory>
 
 
 class MessageHandler {
 public:
-	MessageHandler(Connection) {};
-	void sendCode(int) {};
-	void sendIntParameter(int) {};
-	void sendStringParameter(std::string)) {};
-	int recvCode() {};
-	int recvInt() {};
-	int recvIntParameters() {};
-	std::string recvStringParameter() {};
-	void sendInt(int) {};
+	MessageHandler(std::shared_ptr<Connection>);
+	void sendCode(int);
+	void sendIntParameter(int);
+	void sendStringParameter(std::string);
+	int recvCode();
+	int recvInt();
+	int recvIntParameters();
+	std::string recvStringParameter();
+	void sendInt(int);
+
 private:
-	int recvByte() {};
-	void sendByte(char) {};
-	Connection conn;
+	int recvByte();
+	void sendByte(char);
+	std::shared_ptr<Connection> conn;
+	
 };
 
 #endif

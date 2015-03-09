@@ -3,20 +3,20 @@
 #include "protocol.h"
 #include "messagehandler.h"
 
-MessageHandler::MessageHandler(Connection connection) : conn(connection) {
-
+MessageHandler::MessageHandler(std::shared_ptr<Connection> conn_ptr) : conn(conn_ptr) {
+	
 }
 
 void MessageHandler::sendCode(int code) {
 	sendByte(code);
 }
 
-void sendIntParameter(int parameter) {
+void MessageHandler::sendIntParameter(int parameter) {
 	sendCode(Protocol::PAR_NUM);
 	sendInt(parameter);
 }
 
-void sendStringParameter(std::string parameter){
+void MessageHandler::sendStringParameter(std::string parameter){
 	sendCode(Protocol::PAR_STRING);
 	sendInt(parameter.length());
 	for(auto it = parameter.begin(); it != parameter.end(); ++it) {
@@ -24,11 +24,11 @@ void sendStringParameter(std::string parameter){
 	}
 }
 
-int recvCode() {
+int MessageHandler::recvCode() {
 	return recvByte();
 }
 
-int recvInt() {
+int MessageHandler::recvInt() {
 	int b1 = recvByte();
 	int b2 = recvByte();
 	int b3 = recvByte();
@@ -38,38 +38,38 @@ int recvInt() {
 }
 
 //Maybe throw exception
-int recvIntParameters() {
+int MessageHandler::recvIntParameters() {
 		//Check code??
 	int code = recvCode();
 	return recvInt();	
 }
 
 //throw excep?
-std::string recvStringParameter() {
+std::string MessageHandler::recvStringParameter() {
 
 	//Check code??
 	int code = recvCode();
 	int n = recvInt();
-	string parameter = "";
+	std::string parameter = "";
 	for (int i = 0; i < n; i++) {
-		parameter += conn.read();
+		parameter += conn->read();
 	}
 
 	return parameter;
 }
 
 
-void sendInt(int value) {
+void MessageHandler::sendInt(int value) {
 		sendByte((value >> 24) & 0xFF);
 		sendByte((value >> 16) & 0xFF);
 		sendByte((value >> 8) & 0xFF);
 		sendByte(value & 0xFF);	
 }
-private:
-int recvByte() {
+
+int MessageHandler::recvByte() {
 	/*read returnerar unsigned char*/
-	return (int) conn.read();
+	return (int) conn->read();
 }
-void sendByte(char code) {
-	conn.write((char) code);
+void MessageHandler::sendByte(char code) {
+	conn->write((char) code);
 }

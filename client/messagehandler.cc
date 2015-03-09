@@ -19,7 +19,7 @@ void sendIntParameter(int parameter) {
 void sendStringParameter(std::string parameter){
 	sendCode(Protocol::PAR_STRING);
 	sendInt(parameter.length());
-	for(auto it = parameter.begin(); it != parameter.end(); ++it){
+	for(auto it = parameter.begin(); it != parameter.end(); ++it) {
 		sendByte(*it);
 	}
 }
@@ -33,12 +33,38 @@ int recvInt() {
 	int b2 = recvByte();
 	int b3 = recvByte();
 	int b4 = recvByte();
+
+	return b1 << 24 | b2 << 16 | b3 << 8 | b4;
 }
-	int recvInt() {};
-	int recvIntParameters() {};
-	std::string recvStringParameter() {};
-	void sendInt(int) {};
+
+//Maybe throw exception
+int recvIntParameters() {
+	return recvInt();	
+}
+
+//throw excep?
+std::string recvStringParameter() {
+	int n = recvInt();
+	string parameter = "";
+	for (int i = 0; i < n; i++) {
+		parameter += conn.read();
+	}
+
+	return parameter;
+}
+
+
+void sendInt(int value) {
+		sendByte((value >> 24) & 0xFF);
+		sendByte((value >> 16) & 0xFF);
+		sendByte((value >> 8) & 0xFF);
+		sendByte(value & 0xFF);	
+}
 private:
-	int recvByte() {};
-	void sendByte(char) {};
-	Connection conn;
+int recvByte() {
+	/*read returnerar unsigned char*/
+	return (int) conn.read();
+}
+void sendByte(char code) {
+	conn.write((char) code);
+}

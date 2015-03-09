@@ -1,0 +1,23 @@
+Protokoll:
+ 
+Meddelandet börjar alltid med en CMD_CODE från Protocol-structen.
+Sedan kommer antingen PAR_STRING ELLER PAR_NUM.
+
+PAR_STRING:
+Efter PAR_STRING kommer en int N som berättar hur många tecken parametersträngen innehåller. Denna int hämtas av recvStringParameter() i messagehandler.h så den behöver inte servern hämta själv.
+
+PAR_NUM:
+Efter PAR_NUM kommer en int N som represnterar parametern.
+
+Alla meddelanden avslutas med COM_END ellr ANS_END.
+
+Metoder som behöver kallas från servern för att hämta ett meddelande: 
+
+recvCode - CMD_CODE
+
+recvCode - PAR_STRING eller PAR_NUM
+
+recvStringParameter / recvIntParameter - ska kallas på beroende om PAR_STRING eller PAR_NUM sändes tidigare
+
+recvCode - CMD_END
+

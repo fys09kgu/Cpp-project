@@ -15,7 +15,7 @@ Metoder som behöver kallas från servern för att hämta ett meddelande:
 
 recvCode - CMD_CODE
 
-recvCode - PAR_STRING eller PAR_NUM
+// recvCode - PAR_STRING eller PAR_NUM // Görs automatiskt i recvStringPara och recbIntPara
 
 recvStringParameter / recvIntParameter - ska kallas på beroende om PAR_STRING eller PAR_NUM sändes tidigare
 

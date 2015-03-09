@@ -27,7 +27,7 @@ libclientserver.a: connection.o server.o
 	ranlib libclientserver.a
 
 #memorydatabase: database.o memorydatabase.o
-bestserver: database.o memorydatabase.o
+bestserver: bestserver.o
 
 # Phony targets
 .PHONY: all clean

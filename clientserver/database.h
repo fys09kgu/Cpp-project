@@ -4,13 +4,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+struct Newsgroup;
 class Database {
 
 public:
-	virtual bool addNewsGroup(std::string title);	
-	virtual bool addArticle(int newsGroupID, std::string title, std::string author, std::string text);
-	virtual bool removeNewsGroup(int newsGroupID);
-	virtual bool removeArticle(int newsGroupID, int articleID);
+	virtual bool addNewsgroup(std::string title) = 0;	
+	virtual bool addArticle(uint newsgroupID, std::string title, std::string author, std::string text) = 0;
+	virtual bool removeNewsgroup(uint newsgroupID) = 0;
+	virtual bool removeArticle(uint newsgroupID, uint articleID) = 0;
+	virtual std::vector<Newsgroup> getNewsgroups() = 0;
 };
 
 struct Article {
@@ -19,10 +21,10 @@ struct Article {
 	std::string text;
 };
 
-struct NewsGroup {
+struct Newsgroup {
 	std::string title;
 	std::vector<Article> articles;
-	bool operator==(const NewsGroup& n);
+	bool operator==(const Newsgroup& n);
 };
 
 #endif

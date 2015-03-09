@@ -10,13 +10,14 @@ class MemoryDatabase : public Database{
 
 public:
 	MemoryDatabase();
-	bool addNewsGroup(std::string title);	
+	bool addNewsgroup(std::string title);	
 	bool addArticle(uint newsGroupID, std::string title, std::string author, std::string text);
-	bool removeNewsGroup(uint newsGroupID);
-	bool removeArticle(uint newsGroupID, uint articleID);
+	bool removeNewsgroup(uint newsgroupID);
+	bool removeArticle(uint newsgroupID, uint articleID);
+	std::vector<Newsgroup> getNewsgroups();
 
 
 private: 
-	std::vector<NewsGroup> newsGroups;
+	std::vector<Newsgroup> newsgroups;
 };
 #endif

@@ -25,9 +25,9 @@ all: libclientserver.a bestserver
 libclientserver.a: connection.o server.o
 	ar rv libclientserver.a  connection.o server.o
 	ranlib libclientserver.a
+bestserver: bestserver.o messagehandler.o server.o connection.o memorydatabase.o database.o
 
 #memorydatabase: database.o memorydatabase.o
-bestserver: bestserver.o
 
 # Phony targets
 .PHONY: all clean

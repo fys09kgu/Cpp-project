@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 struct Newsgroup;
+struct Article;
 class Database {
 
 public:
@@ -13,6 +14,9 @@ public:
 	virtual bool removeNewsgroup(uint newsgroupID) = 0;
 	virtual bool removeArticle(uint newsgroupID, uint articleID) = 0;
 	virtual std::vector<Newsgroup> getNewsgroups() = 0;
+	virtual uint getNewsgroupCount() = 0;
+	virtual bool articleExists(uint newsgroupID, uint articleID) = 0;
+	virtual Article getArticle(uint newsgroupID, uint articleID) = 0;
 };
 
 struct Article {

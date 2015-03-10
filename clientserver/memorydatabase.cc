@@ -14,10 +14,10 @@ using namespace std;
 		gr.title = title;
 		auto iter = find(newsgroups.begin(), newsgroups.end(), gr);
 		if (iter == newsgroups.end()) {
-			return false;
-		} 	
-		newsgroups.push_back(gr);
-		return true;
+			newsgroups.push_back(gr);
+			return true;
+		} 			
+		return false;
 	}
 
 
@@ -52,4 +52,26 @@ using namespace std;
 	std::vector<Newsgroup> MemoryDatabase::getNewsgroups(){
 		return newsgroups;
 	}
+
+	uint MemoryDatabase::getNewsgroupCount() {
+		return newsgroups.size();
+	}
+
+	bool MemoryDatabase::articleExists(uint newsgroupID, uint articleID) {
+		return (newsgroupID < getNewsgroupCount() && articleID < newsgroups[newsgroupID].articles.size());
+	}
+
+	Article MemoryDatabase::getArticle(uint newsgroupID, uint articleID) {
+			return newsgroups[newsgroupID].articles[articleID];
+	}
+	
+
+
+
+
+
+
+
+
+	
 

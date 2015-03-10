@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 //	MessageHandler msgHandler(nullptr);
 Connection conn;
 	if (argc == 3) {
-		Connection conn(argv[1], std::stoi(argv[2]));
+		conn(argv[1], std::stoi(argv[2]));
 		if (!conn.isConnected()) {
 			std::cerr << "Connection failed" << std::endl;
 			exit(1);

@@ -11,23 +11,25 @@
 void printHelp(int);
 
 int main(int argc, char* argv[]) {
-	MessageHandler msgHandler(nullptr);
+//	MessageHandler msgHandler(nullptr);
+Connection conn;
 	if (argc == 3) {
 		Connection conn(argv[1], std::stoi(argv[2]));
 		if (!conn.isConnected()) {
 			std::cerr << "Connection failed" << std::endl;
 			exit(1);
 		}
-		std::shared_ptr<Connection> conn_ptr(&conn);
-		MessageHandler msgHandler(conn_ptr);
+		//std::shared_ptr<Connection> conn_ptr(&conn);
+		//MessageHandler msgHandler(conn_ptr);
 	} else {
 
 		std::cerr << "Wrong input" << std::endl;
 		exit(1);
  	}
-
-		
-		
+	// Connections destruktor anropas?
+		std::shared_ptr<Connection> conn_ptr(&conn);
+		MessageHandler msgHandler(conn_ptr);
+			
 	int state = START_SCREEN;
  	std::string line;
  	while (std::cin >> line) {

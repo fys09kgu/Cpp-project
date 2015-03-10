@@ -1,0 +1,1 @@
+Vi tar tisdag. Ni kan kolla på clien.cc och undersök varför anslutningen stängs. Rad 29.

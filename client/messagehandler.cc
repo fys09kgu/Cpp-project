@@ -38,7 +38,7 @@ int MessageHandler::recvInt() {
 }
 
 //Maybe throw exception
-int MessageHandler::recvIntParameters() {
+int MessageHandler::recvIntParameter() {
 		//Check code??
 	int code = recvCode();
 	return recvInt();	

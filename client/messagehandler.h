@@ -15,7 +15,7 @@ public:
 	void sendStringParameter(std::string);
 	int recvCode();
 	int recvInt();
-	int recvIntParameters();
+	int recvIntParameter();
 	std::string recvStringParameter();
 	void sendInt(int);
 

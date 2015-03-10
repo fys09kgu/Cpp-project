@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
  				std::cout << "Newsgroups: \n" << std::endl;
  				for (int i = 0; i < nbrOfGroups; i++) {
- 					std::cout << "Id: " << msgHandler.recvIntParameters() << ", Name: \
+ 					std::cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
  					 " << msgHandler.recvStringParameter() << std::endl;
  				}
  				msgHandler.recvCode();
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
  					std::cout << "Articles: \n" << std::endl;
  					for (int i = 0; i < nbrOfArticles; i++) {
- 						std::cout << "Id: " << msgHandler.recvIntParameters() << ", Name: \
+ 						std::cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
  						" << msgHandler.recvStringParameter() << std::endl;
  					}
 

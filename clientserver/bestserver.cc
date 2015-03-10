@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
 						msghandler.recvCode();
 						msghandler.sendCode(Protocol::ANS_LIST_NG);
 						vector<Newsgroup> newsgrps = database.getNewsgroups();
-						msghandler.sendInt(newsgrps.size());
+						msghandler.sendIntParameter(newsgrps.size());
 						int index = 0;
 
 						for_each(newsgrps.begin(), newsgrps.end(), [&msghandler, &index](Newsgroup& grp){
@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
 						uint artid = msghandler.recvIntParameter();
 
 						msghandler.recvCode();
-	
+						msghandler.sendCode(Protocol::ANS_DELETE_ART);
 						if(database.removeArticle(grpid,artid)) {
 							msghandler.sendCode(Protocol::ANS_ACK);
 						} else {		
@@ -171,7 +171,7 @@ int main(int argc, char* argv[]){
 						uint artid = msghandler.recvIntParameter();
 
 						msghandler.recvCode();
-
+						msghandler.sendCode(Protocol::ANS_GET_ART);
 						if( database.articleExists(grpid, artid)) {
 							msghandler.sendCode(Protocol::ANS_ACK);							
 							Article art = database.getArticle(grpid,artid);

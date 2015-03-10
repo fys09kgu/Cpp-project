@@ -11,7 +11,6 @@
 void printHelp(int);
 
 int main(int argc, char* argv[]) {
-	int state = START_SCREEN;
 	MessageHandler msgHandler(nullptr);
 	if (argc == 3) {
 		Connection conn(argv[1], std::stoi(argv[2]));
@@ -29,22 +28,25 @@ int main(int argc, char* argv[]) {
 
 		
 		
- 	std::string msg;
- 	while (std::cin >> msg) {
- 		std::istringstream iss(msg);
+	int state = START_SCREEN;
+ 	std::string line;
+ 	while (std::cin >> line) {
+ 		std::istringstream iss(line);
 
- 		std::string command;
- 		iss >> command;
+ 		std::string input;
+ 		iss >> input;
 
- 		if (command == "help") {	
+ 		if (input == "help") {	
  			printHelp(state);
- 		} else if (command == "list") {
+ 		} else if (input == "list") {
+
  			if (state == START_SCREEN) {
  				msgHandler.sendCode(Protocol::COM_LIST_NG);
  				msgHandler.sendCode(Protocol::COM_END);
 
- 				msgHandler.recvCode();
+ 				msgHandler.recvCode(); 
  				int nbrOfGroups = msgHandler.recvInt();
+
  				std::cout << "Newsgroups: \n" << std::endl;
  				for (int i = 0; i < nbrOfGroups; i++) {
  					std::cout << "Id: " << msgHandler.recvIntParameters() << ", Name: \
@@ -58,7 +60,9 @@ int main(int argc, char* argv[]) {
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() == Protocol::ANS_ACK) {
+
  					int nbrOfArticles = msgHandler.recvInt();
+
  					std::cout << "Articles: \n" << std::endl;
  					for (int i = 0; i < nbrOfArticles; i++) {
  						std::cout << "Id: " << msgHandler.recvIntParameters() << ", Name: \
@@ -66,21 +70,26 @@ int main(int argc, char* argv[]) {
  					}
 
  					msgHandler.recvCode();
+ 				} else {
+ 					msgHandler.recvCode();
+ 					std::cout << "No such Newsgroup" << std::endl;
  				}
+
+ 				msgHandler.recvCode();
  			}
 
- 		} else if (command == "create") {
+ 		} else if (input == "create") {
+
  			if (state == START_SCREEN) {
  				msgHandler.sendCode(Protocol::COM_CREATE_NG);
 
- 				iss >> command;
- 				msgHandler.sendStringParameter(command);
-
+ 				iss >> input;
+ 				msgHandler.sendStringParameter(input);
  				msgHandler.sendCode(Protocol::COM_END);
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					//FEL!!
+ 					std::cout << "Newsgroup already exist" << std::endl;
  				}
  				msgHandler.recvCode();
 
@@ -88,63 +97,63 @@ int main(int argc, char* argv[]) {
  				msgHandler.sendCode(Protocol::COM_CREATE_ART);
  				msgHandler.sendInt(state);
 
- 				iss >> command;
- 				msgHandler.sendStringParameter(command);
+ 				iss >> input;
+ 				msgHandler.sendStringParameter(input);
 
- 				iss >> command;
- 				msgHandler.sendStringParameter(command);
+ 				iss >> input;
+ 				msgHandler.sendStringParameter(input);
  				
- 				iss >> command;
- 				msgHandler.sendStringParameter(command);
+ 				iss >> input;
+ 				msgHandler.sendStringParameter(input);
 
  				msgHandler.sendCode(Protocol::COM_END);
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					//FEL!!
+ 					std::cout << "Newsgroup doesnt exist" << std::endl;
  				}
  				msgHandler.recvCode();
  			}
- 		} else if (command ==  "delete") {
+ 		} else if (input ==  "delete") {
  			if (state == START_SCREEN) {
  				msgHandler.sendCode(Protocol::COM_DELETE_NG);
 
- 				iss >> command;
- 				msgHandler.sendInt(stoi(command));
+ 				iss >> input;
+ 				msgHandler.sendInt(stoi(input));
 
  				msgHandler.sendCode(Protocol::COM_END);
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					//FEL!!
+ 					std::cout << "Newsgroup doesnt exist" << std::endl;
  				}
  				msgHandler.recvCode();
  			} else {
  				msgHandler.sendCode(Protocol::COM_DELETE_ART);
  				msgHandler.sendInt(state);
 
- 				iss >> command;
- 				msgHandler.sendInt(stoi(command));
+ 				iss >> input;
+ 				msgHandler.sendInt(stoi(input));
 
  				msgHandler.sendCode(Protocol::COM_END);
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
  					if (msgHandler.recvCode() == Protocol::ERR_NG_DOES_NOT_EXIST) {
- 						// NO SUCH NG
+ 						std::cout << "Newsgroup doesnt exist" << std::endl;
  					} else {
- 						// NU SUCH ARTICLE
+ 						std::cout << "Article doesnt exist" << std::endl;
  					}
  				} 
  				msgHandler.recvCode();
  			}
 
 
- 		} else if (command == "read") {
+ 		} else if (input == "read") {
  			msgHandler.sendCode(Protocol::COM_GET_ART);
  			msgHandler.sendInt(state);
- 			iss >> command;
- 			msgHandler.sendInt(stoi(command));
+ 			iss >> input;
+ 			msgHandler.sendInt(stoi(input));
  			msgHandler.sendCode(Protocol::COM_END);
 
  			msgHandler.recvCode();
@@ -158,20 +167,20 @@ int main(int argc, char* argv[]) {
  				std::cout << text << std::endl;
  			} else {
  				if (msgHandler.recvCode() == Protocol::ERR_NG_DOES_NOT_EXIST) {
-
+ 					std::cout << "Newsgroup doesnt exist" << std::endl;
  				} else {
-
+ 					std::cout << "Article doesnt exist" << std::endl;
  				}
  			}
 
  			msgHandler.recvCode();
 
 
- 		}else if (command == "back") {
+ 		}else if (input == "back") {
  			state = START_SCREEN;
- 		}else if (command == "open") {
- 			iss >> command;
- 			state = stoi(command);
+ 		}else if (input == "open") {
+ 			iss >> input;
+ 			state = stoi(input);
  		} else {
  			std::cout << "No such command, write help for available commands" << std::endl;
 

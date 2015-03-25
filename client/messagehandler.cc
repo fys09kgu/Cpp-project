@@ -2,6 +2,7 @@
 #include "connection.h"
 #include "protocol.h"
 #include "messagehandler.h"
+#include <iostream>
 
 MessageHandler::MessageHandler(std::shared_ptr<Connection> conn_ptr) : conn(conn_ptr) {
 	
@@ -34,6 +35,7 @@ int MessageHandler::recvInt() {
 	int b3 = recvByte();
 	int b4 = recvByte();
 
+//	std::cout << b1 << " " << b2 << " " << b3 << " " << b4 << std::endl;
 	return b1 << 24 | b2 << 16 | b3 << 8 | b4;
 }
 
@@ -41,6 +43,7 @@ int MessageHandler::recvInt() {
 int MessageHandler::recvIntParameter() {
 		//Check code??
 	int code = recvCode();
+//	std::cout << code << std::endl;
 	return recvInt();	
 }
 

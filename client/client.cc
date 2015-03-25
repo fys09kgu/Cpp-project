@@ -7,35 +7,35 @@
 
 #define START_SCREEN -1
 
+using namespace std;
 
 void printHelp(int);
 
 int main(int argc, char* argv[]) {
 //	MessageHandler msgHandler(nullptr);
-Connection conn;
-	if (argc == 3) {
-		conn(argv[1], std::stoi(argv[2]));
-		if (!conn.isConnected()) {
-			std::cerr << "Connection failed" << std::endl;
-			exit(1);
-		}
-		//std::shared_ptr<Connection> conn_ptr(&conn);
-		//MessageHandler msgHandler(conn_ptr);
-	} else {
-
-		std::cerr << "Wrong input" << std::endl;
+	if (argc != 3) {
+		cerr << "Wrong input" << endl;
 		exit(1);
  	}
+	Connection conn(argv[1], stoi(argv[2]));		
+
+	if (!conn.isConnected()) {
+			cerr << "Connection failed" << endl;
+			exit(1);
+	
+		//shared_ptr<Connection> conn_ptr(&conn);
+		//MessageHandler msgHandler(conn_ptr);
+	} 
 	// Connections destruktor anropas?
-		std::shared_ptr<Connection> conn_ptr(&conn);
+		shared_ptr<Connection> conn_ptr(&conn);
 		MessageHandler msgHandler(conn_ptr);
 			
 	int state = START_SCREEN;
- 	std::string line;
- 	while (std::cin >> line) {
- 		std::istringstream iss(line);
+ 	string line;
+ 	while (getline(cin, line)) {
+ 		istringstream iss(line);
 
- 		std::string input;
+ 		string input;
  		iss >> input;
 
  		if (input == "help") {	
@@ -43,16 +43,16 @@ Connection conn;
  		} else if (input == "list") {
 
  			if (state == START_SCREEN) {
+				cout << "START!" << endl;
  				msgHandler.sendCode(Protocol::COM_LIST_NG);
  				msgHandler.sendCode(Protocol::COM_END);
-
- 				msgHandler.recvCode(); 
- 				int nbrOfGroups = msgHandler.recvInt();
-
- 				std::cout << "Newsgroups: \n" << std::endl;
+ 				msgHandler.recvCode();
+ 				int nbrOfGroups = msgHandler.recvIntParameter();
+				cout << nbrOfGroups << endl;
+ 				cout << "Newsgroups: \n" << endl;
  				for (int i = 0; i < nbrOfGroups; i++) {
- 					std::cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
- 					 " << msgHandler.recvStringParameter() << std::endl;
+ 					cout << "Id: " << msgHandler.recvIntParameter();
+					cout << ", Name: " << msgHandler.recvStringParameter() << endl;
  				}
  				msgHandler.recvCode();
  			} else {
@@ -65,16 +65,16 @@ Connection conn;
 
  					int nbrOfArticles = msgHandler.recvInt();
 
- 					std::cout << "Articles: \n" << std::endl;
+ 					cout << "Articles: \n" << endl;
  					for (int i = 0; i < nbrOfArticles; i++) {
- 						std::cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
- 						" << msgHandler.recvStringParameter() << std::endl;
+ 						cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
+ 						" << msgHandler.recvStringParameter() << endl;
  					}
 
  					msgHandler.recvCode();
  				} else {
  					msgHandler.recvCode();
- 					std::cout << "No such Newsgroup" << std::endl;
+ 					cout << "No such Newsgroup" << endl;
  				}
 
  				msgHandler.recvCode();
@@ -91,7 +91,7 @@ Connection conn;
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					std::cout << "Newsgroup already exist" << std::endl;
+ 					cout << "Newsgroup already exist" << endl;
  				}
  				msgHandler.recvCode();
 
@@ -112,7 +112,7 @@ Connection conn;
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					std::cout << "Newsgroup doesnt exist" << std::endl;
+ 					cout << "Newsgroup doesnt exist" << endl;
  				}
  				msgHandler.recvCode();
  			}
@@ -127,7 +127,7 @@ Connection conn;
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
- 					std::cout << "Newsgroup doesnt exist" << std::endl;
+ 					cout << "Newsgroup doesnt exist" << endl;
  				}
  				msgHandler.recvCode();
  			} else {
@@ -142,9 +142,9 @@ Connection conn;
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
  					if (msgHandler.recvCode() == Protocol::ERR_NG_DOES_NOT_EXIST) {
- 						std::cout << "Newsgroup doesnt exist" << std::endl;
+ 						cout << "Newsgroup doesnt exist" << endl;
  					} else {
- 						std::cout << "Article doesnt exist" << std::endl;
+ 						cout << "Article doesnt exist" << endl;
  					}
  				} 
  				msgHandler.recvCode();
@@ -161,17 +161,17 @@ Connection conn;
  			msgHandler.recvCode();
 
  			if (msgHandler.recvCode() == Protocol::ANS_ACK) {
- 				std::string title = msgHandler.recvStringParameter();
- 				std::string author = msgHandler.recvStringParameter();
- 				std::string text = msgHandler.recvStringParameter();
- 				std::cout << "Title: " << title << std::endl;
- 				std::cout << "Author: " << author << std::endl;
- 				std::cout << text << std::endl;
+ 				string title = msgHandler.recvStringParameter();
+ 				string author = msgHandler.recvStringParameter();
+ 				string text = msgHandler.recvStringParameter();
+ 				cout << "Title: " << title << endl;
+ 				cout << "Author: " << author << endl;
+ 				cout << text << endl;
  			} else {
  				if (msgHandler.recvCode() == Protocol::ERR_NG_DOES_NOT_EXIST) {
- 					std::cout << "Newsgroup doesnt exist" << std::endl;
+ 					cout << "Newsgroup doesnt exist" << endl;
  				} else {
- 					std::cout << "Article doesnt exist" << std::endl;
+ 					cout << "Article doesnt exist" << endl;
  				}
  			}
 
@@ -184,7 +184,7 @@ Connection conn;
  			iss >> input;
  			state = stoi(input);
  		} else {
- 			std::cout << "No such command, write help for available commands" << std::endl;
+ 			cout << "No such command, write help for available commands" << endl;
 
  		} 
 
@@ -195,13 +195,13 @@ Connection conn;
 
 void printHelp(int state) {
 	if (state == START_SCREEN) { 
-		std::cout << "-- Usenet client -- \n \n \
+		cout << "-- Usenet client -- \n \n \
 		Commands: \n list - Lists all newsgroups \n create [newsgroup] - Create new newsgroup \n \
-		delete [newsgroup] - Delete newsgroup \n open [newsgroup] - View content of newsgroup" << std::endl;
+		delete [newsgroup] - Delete newsgroup \n open [newsgroup] - View content of newsgroup" << endl;
 	} else { 		
-		std::cout << "-- Usenet client -- \n \n \
+		cout << "-- Usenet client -- \n \n \
 		Commands: \n list - List all articles \n create [article] - Create new article \n \
-		delete [article] - Delete articles \n read [article] - View content of newsgroup \n back - Back" << std::endl;	
+		delete [article] - Delete articles \n read [article] - View content of newsgroup \n back - Back" << endl;	
 	}
 }
 

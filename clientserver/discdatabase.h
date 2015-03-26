@@ -15,10 +15,11 @@ public:
 	bool removeNewsgroup(uint newsgroupID);
 	bool removeArticle(uint newsgroupID, uint articleID);
 	bool articleExists(uint newsgroupID, uint articleID);		
-	Article getArticle(uint newsgroupID, uint articleID);		
+	Article getArticle(uint newsgroupID, uint articleID);	
 	std::map<uint, Newsgroup> getNewsgroups();
 	uint getNewsgroupCount();
 	void incID();
+	Newsgroup* getNewsgroup(uint ID);
 
 private: 
 	std::vector<Newsgroup> newsgroups;

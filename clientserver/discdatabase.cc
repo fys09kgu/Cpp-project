@@ -55,13 +55,25 @@ using namespace std;
 
 	bool DiscDatabase::removeArticle(uint newsgroupID, uint articleID){		return false;}
 	bool DiscDatabase::articleExists(uint newsgroupID, uint articleID){		return false;}		
-	Article DiscDatabase::getArticle(uint newsgroupID, uint articleID){		
-	Article art;
-return art;}		
-	std::map<uint, Newsgroup> DiscDatabase::getNewsgroups(){
+	Article DiscDatabase::getArticle(uint newsgroupID, uint articleID){
+		Article* art = new Article();
+		return *art;
+	}		
+	
+std::map<uint, Newsgroup> DiscDatabase::getNewsgroups(){
 	map<uint, Newsgroup> gg;
-	return gg;}
-	uint DiscDatabase::getNewsgroupCount(){return 0;}
+	return gg;
+}
+
+
+	uint DiscDatabase::getNewsgroupCount(){
+return 0;
+
+}
+
+	Newsgroup* DiscDatabase::getNewsgroup(uint ID){
+		return new Newsgroup();
+	}
 
 
 

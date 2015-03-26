@@ -31,3 +31,14 @@ using namespace std;
 	Article DiscDatabase::getArticle(uint newsgroupID, uint articleID){}		
 	std::map<Newsgroup> DiscDatabase::getNewsgroups(){}
 	uint DiscDatabase::getNewsgroupCount(){}
+
+
+
+	bool fileExists (const std::string& name) {
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }   
+}

@@ -6,13 +6,14 @@
 using namespace std;
 
 
-	MemoryDatabase::MemoryDatabase() : nextID(0){
+	MemoryDatabase::MemoryDatabase() {
+	
 	}
-
+/*
 	void MemoryDatabase::incID(){
 		++nextID;	
 	}
-
+*/
 /*	Newsgroup MemoryDatabase::getNewsgroup(uint id){
 		return *newsgroups.find(id);
 	}
@@ -32,7 +33,7 @@ using namespace std;
 				return false;
 			}	
 		}); */
-		newsgroups.insert(make_pair(nextID, gr));
+		newsgroups.insert(make_pair(getID(), gr));
 		incID();
 		return true;
 		

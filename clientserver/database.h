@@ -19,7 +19,14 @@ public:
 	virtual uint getNewsgroupCount() = 0;
 	virtual bool articleExists(uint newsgroupID, uint articleID) = 0;
 	virtual Article getArticle(uint newsgroupID, uint articleID) = 0;
-	virtual void incID() = 0;
+	void incID();
+	uint getID();
+	void setID(uint id);
+
+
+private:
+	uint nextID = 0;
+
 };
 
 struct Article {

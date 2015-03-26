@@ -17,13 +17,13 @@ public:
 	Newsgroup* getNewsgroup(uint ID);
 	bool removeArticle(uint newsgroupID, uint articleID);
 	bool articleExists(uint newsgroupID, uint articleID);
-	void incID();		
+//	void incID();		
 	Article getArticle(uint newsgroupID, uint articleID);		
 	std::map<uint, Newsgroup> getNewsgroups();
 	uint getNewsgroupCount();
 
 private: 
 	std::map<uint, Newsgroup> newsgroups;
-	uint nextID;
+	
 };
 #endif

@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 			
 	int state = START_SCREEN;
  	string line;
+	printHelp(state);
  	while (getline(cin, line)) {
  		istringstream iss(line);
 
@@ -43,7 +44,6 @@ int main(int argc, char* argv[]) {
  		} else if (input == "list") {
 
  			if (state == START_SCREEN) {
-				cout << "START!" << endl;
  				msgHandler.sendCode(Protocol::COM_LIST_NG);
  				msgHandler.sendCode(Protocol::COM_END);
  				msgHandler.recvCode();

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 struct Newsgroup;
 struct Article;
 class Database {
@@ -13,10 +14,12 @@ public:
 	virtual bool addArticle(uint newsgroupID, std::string title, std::string author, std::string text) = 0;
 	virtual bool removeNewsgroup(uint newsgroupID) = 0;
 	virtual bool removeArticle(uint newsgroupID, uint articleID) = 0;
-	virtual std::vector<Newsgroup> getNewsgroups() = 0;
+//	virtual Newsgroup getNewsgroup(uint ID) = 0;
+	virtual std::map<uint, Newsgroup> getNewsgroups() = 0;
 	virtual uint getNewsgroupCount() = 0;
 	virtual bool articleExists(uint newsgroupID, uint articleID) = 0;
 	virtual Article getArticle(uint newsgroupID, uint articleID) = 0;
+	virtual void incID() = 0;
 };
 
 struct Article {
@@ -27,8 +30,9 @@ struct Article {
 
 struct Newsgroup {
 	std::string title;
-	std::vector<Article> articles;
+	std::map<uint, Article> articles;
 	bool operator==(const Newsgroup& n);
+	uint nextArtID = 0;
 };
 
 #endif

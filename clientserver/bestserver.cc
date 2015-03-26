@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
 	
 
 	if(argc != 2) { 
-		cerr << "Usage: myserver port-number" << endl;
+		cerr << "Usage: bestserver <port-number>" << endl;
 		exit(1);
 	}
 
@@ -51,13 +51,14 @@ int main(int argc, char* argv[]){
 						{
 						msghandler.recvCode();
 						msghandler.sendCode(Protocol::ANS_LIST_NG);
-						vector<Newsgroup> newsgrps = database.getNewsgroups();
+						map<uint, Newsgroup> newsgrps = database.getNewsgroups();
 						msghandler.sendIntParameter(newsgrps.size());
-						int index = 0;
 
-						for_each(newsgrps.begin(), newsgrps.end(), [&msghandler, &index](Newsgroup& grp){
-							msghandler.sendIntParameter(index++);
-							msghandler.sendStringParameter(grp.title);
+						for_each(newsgrps.begin(), newsgrps.end(), [&](pair<const uint, Newsgroup>& grp){
+							msghandler.sendIntParameter(grp.first);
+							msghandler.sendStringParameter(grp.second.title);
+
+
 						});
 							msghandler.sendCode(Protocol::ANS_END);
 
@@ -99,18 +100,15 @@ int main(int argc, char* argv[]){
 						uint index = msghandler.recvIntParameter();
 						msghandler.recvCode();
 						msghandler.sendCode(Protocol::ANS_LIST_ART);
-						vector<Newsgroup> newsgrps = database.getNewsgroups();
-						
-						if (index < newsgrps.size()) {
+						map<uint, Newsgroup> newsgrps = database.getNewsgroups();
+						if (newsgrps.count(index) != 0) {
 							msghandler.sendCode(Protocol::ANS_ACK);
 							
-							vector<Article> articles = newsgrps[index].articles;
-							msghandler.sendIntParameter(articles.size());
-
-							int count = 0;							
-							for_each(articles.begin(), articles.end(), [&count, &msghandler](Article& art){
-								msghandler.sendIntParameter(count++);
-								msghandler.sendStringParameter(art.title);	
+						//	map<uint, Article> articles = newsgrps[index].articles;
+							msghandler.sendIntParameter(newsgrps[index].articles.size());
+							for_each(newsgrps[index].articles.begin(), newsgrps[index].articles.end(), [&](pair<const uint, Article>& art){
+								msghandler.sendIntParameter(art.first);
+								msghandler.sendStringParameter(art.second.title);	
 							});
 							
 						} else {
@@ -125,7 +123,7 @@ int main(int argc, char* argv[]){
 					case Protocol::COM_CREATE_ART:
 						{
 						uint id = msghandler.recvIntParameter();
-						string title = msghandler.recvStringParameter();
+						string title = msghandler.recvStringParameter();					
 						string author = msghandler.recvStringParameter();
 						string text = msghandler.recvStringParameter();
 

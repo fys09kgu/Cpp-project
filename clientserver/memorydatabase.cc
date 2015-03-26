@@ -20,11 +20,30 @@ using namespace std;
 	bool MemoryDatabase::addNewsgroup(string title){
 		Newsgroup gr;
 		gr.title = title;
-		if(newsgroups.insert(make_pair(nextID, gr)).second){
-			incID();
-			return true;
+
+		for(auto grp : newsgroups){
+			if(gr.title == grp.second.title){
+				return false;
+			}
 		}
-		return false;
+/*
+		for_each(newsgroups.begin(), newsgroups.end(), [&](pair<const uint, Newsgroup>& grp){
+			if(gr.title == grp.second.title){
+				return false;
+			}	
+		}); */
+		newsgroups.insert(make_pair(nextID, gr));
+		incID();
+		return true;
+		
+	}
+
+	Newsgroup* MemoryDatabase::getNewsgroup(uint ID){
+		Newsgroup* ptr = nullptr;
+		if(newsgroups.count(ID) != 0){
+			ptr = &newsgroups[ID];			
+		}
+		return ptr;
 	}
 
 
@@ -34,7 +53,9 @@ using namespace std;
 			ar.author = author;
 			ar.text = text;
 			
-			if(newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar)).second){
+//			if(newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar)).second){
+			if(getNewsgroup(newsgroupID) != nullptr){
+				newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar));
 				++newsgroups[newsgroupID].nextArtID;
 				return true;
 			}

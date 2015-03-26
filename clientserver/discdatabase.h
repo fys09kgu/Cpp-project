@@ -1,29 +1,26 @@
-#ifndef MEMORYDATABASE_H
-#define MEMORYDATABASE_H
+#ifndef DISCDATABASE_H
+#define DISCDATABASE_H
 
 #include <iostream>
 #include <string>
-#include <vector>
-#include "database.h"
 #include <map>
+#include "database.h"
 
-class MemoryDatabase : public Database{
+class DiscDatabase : public Database{
 
 public:
-	MemoryDatabase();
+	DiscDatabase();
 	bool addNewsgroup(std::string title);	
 	bool addArticle(uint newsGroupID, std::string title, std::string author, std::string text);
 	bool removeNewsgroup(uint newsgroupID);
-	Newsgroup* getNewsgroup(uint ID);
 	bool removeArticle(uint newsgroupID, uint articleID);
-	bool articleExists(uint newsgroupID, uint articleID);
-	void incID();		
+	bool articleExists(uint newsgroupID, uint articleID);		
 	Article getArticle(uint newsgroupID, uint articleID);		
 	std::map<uint, Newsgroup> getNewsgroups();
 	uint getNewsgroupCount();
+	void incID();
 
 private: 
-	std::map<uint, Newsgroup> newsgroups;
-	uint nextID;
+	std::vector<Newsgroup> newsgroups;
 };
 #endif

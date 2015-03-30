@@ -18,10 +18,9 @@ public:
 	Article getArticle(uint newsgroupID, uint articleID);	
 	std::map<uint, Newsgroup> getNewsgroups();
 	uint getNewsgroupCount();
-	void incID();
 	Newsgroup* getNewsgroup(uint ID);
 
 private: 
-	std::vector<Newsgroup> newsgroups;
+	std::map<uint, Newsgroup> newsgroups;
 };
 #endif

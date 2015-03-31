@@ -18,4 +18,3 @@ using namespace std;
 		nextID = id;
 	}
 
-

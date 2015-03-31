@@ -10,13 +10,14 @@
 #include <fstream> 	
 #include <string>
 #include <string.h>
+#include <unistd.h>
+
 using namespace std;
 	
 
 //GÅR NOG IN I "." och ".." FIXA
 	DiscDatabase::DiscDatabase(){
 		uint counter = 0;
-cout << ++counter << endl;
 		
 		//skapa fil med nextIDgrejs
 		//skapa rootgrejs
@@ -26,30 +27,34 @@ cout << ++counter << endl;
 			mkdir("root", S_IRWXU | S_IRWXG | S_IRWXO);
 			pdir=opendir("./root");
 		}
-cout << ++counter << endl;
 		DIR* cdir;
 		struct dirent *art;
 		fstream fs;
 		struct dirent *pent;
 		unsigned char isFolder =0x4;	
+		int a = 0;
+		readdir(pdir); // Läs katalogen två gånger för att undvika . och ..
+		readdir(pdir);  
 		while ((pent=readdir(pdir))){
-cout << ++counter << endl;
+
 			if(pent->d_type == isFolder) {
 				string fullName(pent->d_name);				
 				size_t index = fullName.find("_");
-cout << ++counter << endl;
-				uint id = stoi(fullName.substr(0, index-1));
-cout << ++counter << endl;
-				string name = fullName.substr(index);
+				uint id = stoi(fullName.substr(0, index));
+				string name = fullName.substr(index+1);
 				Newsgroup gr;
 				gr.title = name;
-				newsgroups.insert(make_pair(id, gr));
+				//newsgroups.insert(make_pair(id, gr));
 				char dirpath[256];
 				strcpy (dirpath, "./root/");
 				strcat (dirpath, pent->d_name);
 				cdir = opendir(dirpath);
+
+				readdir(cdir); // Läs katalogen två gånger för att undvika . och ..
+				readdir(cdir); 
 				while((art = readdir(cdir))){
-					if(art->d_name == "nextID"){
+					string artName(art->d_name);
+					if(artName == "nextID"){
 						fs.open("./root/" + fullName + "/nextID");
 						if(fs.is_open()){
 							string tempnext;
@@ -57,57 +62,69 @@ cout << ++counter << endl;
 							gr.nextArtID = stoi(tempnext);
 						}
 						fs.close();
-					}
-					string artName(art->d_name);					
-					index = artName.find("_");
-cout << ++counter << endl;
-					uint id = stoi(artName.substr(0, index-1));
-cout << ++counter << endl;
-					string name = artName.substr(index);
-					Article article;
-					getline(fs, article.author);
-					article.title = name;
-					string text;
-					while(getline(fs, text)){
-						article.text += text;					
+					}else{
+						fs.open("./root/" + fullName + "/" + artName);
+cout << "artname " << artName << endl;
+				//		index = artName.find("_");
+	//					uint id = stoi(artName);
+//						string name = artName.substr(index);
+						Article article;
+						getline(fs, article.title);
+						getline(fs, article.author);
+//						article.title = name;
+						string text;
+						while(getline(fs, text)){
+							article.text += text;					
+						}
+						cout << article.title << endl;
+					gr.articles.insert(make_pair(gr.nextArtID, article));
+					fs.close();
 					}
 				}
-			}
+				newsgroups.insert(make_pair(id, gr));
 	 	}
-cout << ++counter << endl;				
-		fs.open("nextID");
+	}
+					
+		fstream fs2;		
+		fs.open("./root/nextID");
 		if(fs.is_open()){
 			string tmp;
 			fs >> tmp;
 			setID(stoi(tmp));
 		}else{
-			fs << 0;		
+//			fs << 0;		
+			ofstream ofs;
+			ofs.open("./root/nextID");
+			ofs << 0;
+			ofs.close();
 		}
 		fs.close();
-cout << ++counter << endl;
+cout << "slutt" << endl;
 	}
 
 
 	bool DiscDatabase::addNewsgroup(std::string title){
 		string temptitle;
-		temptitle = getID() + "_" + title;
-		
+		temptitle = (to_string(getID()) + "_" + title);
+cout << title << endl;		
 		for(auto it = newsgroups.begin(); it != newsgroups.end(); ++ it) {
 			Newsgroup gr = it->second;
 			string str = gr.title;
 			if (str==title) return false; 			
 		}
+cout << temptitle << endl;
 
-		const char* chtitle = temptitle.c_str();
+		const char* chtitle = ("./root/" + temptitle).c_str();
+cout << chtitle << endl;
 		mkdir(chtitle, S_IRWXU | S_IRWXG | S_IRWXO);
 
 		fstream fs;
-		fs.open("nextID");
+		fs.open("./root/nextID");
 		if(fs.is_open()){
 			incID();			
 			fs << getID();
 		} else {
-			
+
 			return false;
 		}
 		fs.close();
@@ -115,40 +132,109 @@ cout << ++counter << endl;
 		ng.title = title;
 		newsgroups.insert(make_pair(getID()-1,ng));
 
-		
-	
-		fs.open(temptitle + "/nextID");
 				
+		ofstream ofs;
+		ofs.open("./root/" + temptitle + "/nextID");
+		ofs << 0;
+		ofs.close();
 
-
-
-
-
-		//skapa fil i katalogen med nextID
 		return true;
 	}	
 
-	bool DiscDatabase::addArticle(uint newsGroupID, std::string title, std::string author, std::string text){
+	string getNewsgroupPath(uint id){
+		DIR* pdir;
+		struct dirent *pent;
+		pdir=opendir("./root");
+		while ((pent=readdir(pdir))){
+			string ngName = pent->d_name;
+			size_t index = ngName.find("_");
+			if((index != string::npos) && (stoi(ngName.substr(0, index)) == id)){
+				return ("./root/" + ngName);
+			}
+		}
+	} 
+
+
+
+	bool DiscDatabase::addArticle(uint newsgroupID, std::string title, std::string author, std::string text){
 			
+			Article ar;	
+			ar.title = title;
+			ar.author = author;
+			ar.text = text;
+			
+//			if(newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar)).second){
+			if(getNewsgroup(newsgroupID) != nullptr){
+				cout << "legz den in?" << endl;
+				newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar));
+				++newsgroups[newsgroupID].nextArtID;
 
-
-
-
-
+//				ofstream(getNewsgroupPath(newsgroupID)
+				string ngPath = "./root/" + to_string(newsgroupID) + "_" + newsgroups[newsgroupID].title + "/";
+				
+			fstream fs;
+			fs.open(ngPath + "nextID");
+			
+			string id;
+			if(fs.is_open()){	
+				fs >> id;
+				setID(stoi(id));
+				incID();
+				fs << to_string(getID());
+			}else{
+				cout << "fel :(" << endl;
+				return false;
+			}
+			fs.close();
+			
+			ofstream ofs;
+			ofs.open(ngPath + id);
+			ofs << title << endl;
+			ofs << author << endl;
+			ofs << text << endl;
+			ofs.close();
+				return true;
+			}
 
 
 		return false;
 	}
 
 	bool DiscDatabase::removeNewsgroup(uint newsgroupID){
+		string ngPath = getNewsgroupPath(newsgroupID);
+		if(ngPath == "./root/"){
+			return false;
+		}else if(newsgroups.erase(newsgroupID)){
+			const char* cPath = ngPath.c_str();
+			rmdir(cPath);
+			return true;
+		}
+		cout << "fel" << endl;
 		return false;
 	}
 
-	bool DiscDatabase::removeArticle(uint newsgroupID, uint articleID){		return false;}
-	bool DiscDatabase::articleExists(uint newsgroupID, uint articleID){		return false;}		
+	bool DiscDatabase::removeArticle(uint newsgroupID, uint articleID){	
+		string artPath = getNewsgroupPath(newsgroupID);
+		if(artPath == "./root/"){
+			return false;
+		} else if (newsgroups[newsgroupID].articles.erase(articleID)) {
+			artPath += to_string(articleID);
+			const char* cPath = artPath.c_str();
+			remove(cPath);
+			return true;
+		}
+			return false;
+	}
+
+
+	bool DiscDatabase::articleExists(uint newsgroupID, uint articleID){		
+		return newsgroups[newsgroupID].articles.count(articleID) != 0;
+	}		
+	
+
+
 	Article DiscDatabase::getArticle(uint newsgroupID, uint articleID){
-		Article* art = new Article();
-		return *art;
+		return newsgroups[newsgroupID].articles[articleID];
 	}		
 	
 	std::map<uint, Newsgroup> DiscDatabase::getNewsgroups(){

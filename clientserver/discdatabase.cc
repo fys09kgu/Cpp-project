@@ -14,13 +14,7 @@
 
 using namespace std;
 	
-
-//GÅR NOG IN I "." och ".." FIXA
 	DiscDatabase::DiscDatabase(){
-		uint counter = 0;
-		
-		//skapa fil med nextIDgrejs
-		//skapa rootgrejs
 		DIR* pdir;		
 		pdir=opendir("./root");
 		if(!pdir){
@@ -32,12 +26,11 @@ using namespace std;
 		fstream fs;
 		struct dirent *pent;
 		unsigned char isFolder =0x4;	
-		int a = 0;
 		readdir(pdir); // Läs katalogen två gånger för att undvika . och ..
 		readdir(pdir);  
 		while ((pent=readdir(pdir))){
 
-			if(pent->d_type == isFolder) {
+			if(pent->d_type == isFolder) { 
 				string fullName(pent->d_name);				
 				size_t index = fullName.find("_");
 				uint id = stoi(fullName.substr(0, index));
@@ -64,19 +57,13 @@ using namespace std;
 						fs.close();
 					}else{
 						fs.open("./root/" + fullName + "/" + artName);
-cout << "artname " << artName << endl;
-				//		index = artName.find("_");
-	//					uint id = stoi(artName);
-//						string name = artName.substr(index);
 						Article article;
-						getline(fs, article.title);
+						getline(fs, article.title); // Läs två gånger för att undvika . och ..
 						getline(fs, article.author);
-//						article.title = name;
 						string text;
 						while(getline(fs, text)){
 							article.text += text;					
 						}
-						cout << article.title << endl;
 					gr.articles.insert(make_pair(gr.nextArtID, article));
 					fs.close();
 					}
@@ -91,31 +78,26 @@ cout << "artname " << artName << endl;
 			string tmp;
 			fs >> tmp;
 			setID(stoi(tmp));
-		}else{
-//			fs << 0;		
+		}else{	
 			ofstream ofs;
 			ofs.open("./root/nextID");
 			ofs << 0;
 			ofs.close();
 		}
 		fs.close();
-cout << "slutt" << endl;
 	}
 
 
 	bool DiscDatabase::addNewsgroup(std::string title){
 		string temptitle;
 		temptitle = (to_string(getID()) + "_" + title);
-cout << title << endl;		
 		for(auto it = newsgroups.begin(); it != newsgroups.end(); ++ it) {
 			Newsgroup gr = it->second;
 			string str = gr.title;
 			if (str==title) return false; 			
 		}
-cout << temptitle << endl;
 
 		const char* chtitle = ("./root/" + temptitle).c_str();
-cout << chtitle << endl;
 		mkdir(chtitle, S_IRWXU | S_IRWXG | S_IRWXO);
 
 		fstream fs;
@@ -124,7 +106,6 @@ cout << chtitle << endl;
 			incID();			
 			fs << getID();
 		} else {
-
 			return false;
 		}
 		fs.close();
@@ -163,36 +144,31 @@ cout << chtitle << endl;
 			ar.author = author;
 			ar.text = text;
 			
-//			if(newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar)).second){
 			if(getNewsgroup(newsgroupID) != nullptr){
-				cout << "legz den in?" << endl;
 				newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar));
 				++newsgroups[newsgroupID].nextArtID;
-
-//				ofstream(getNewsgroupPath(newsgroupID)
 				string ngPath = "./root/" + to_string(newsgroupID) + "_" + newsgroups[newsgroupID].title + "/";
 				
-			fstream fs;
-			fs.open(ngPath + "nextID");
+				fstream fs;
+				fs.open(ngPath + "nextID");
 			
-			string id;
-			if(fs.is_open()){	
-				fs >> id;
-				setID(stoi(id));
-				incID();
-				fs << to_string(getID());
-			}else{
-				cout << "fel :(" << endl;
-				return false;
-			}
-			fs.close();
+				string id;
+				if(fs.is_open()){	
+					fs >> id;
+					setID(stoi(id));
+					incID();
+					fs << to_string(getID());
+				}else{
+					return false;
+				}
+				fs.close();
 			
-			ofstream ofs;
-			ofs.open(ngPath + id);
-			ofs << title << endl;
-			ofs << author << endl;
-			ofs << text << endl;
-			ofs.close();
+				ofstream ofs;
+				ofs.open(ngPath + id);
+				ofs << title << endl;
+				ofs << author << endl;
+				ofs << text << endl;
+				ofs.close();
 				return true;
 			}
 
@@ -205,11 +181,20 @@ cout << chtitle << endl;
 		if(ngPath == "./root/"){
 			return false;
 		}else if(newsgroups.erase(newsgroupID)){
+			DIR* pdir;
 			const char* cPath = ngPath.c_str();
+			pdir=opendir(cPath);
+			struct dirent* file;
+			string filePath;
+			while((file=readdir(pdir))){
+				filePath = ngPath + "/" + file->d_name;
+				remove(filePath.c_str());
+			}
+
+cout << cPath << endl;
 			rmdir(cPath);
 			return true;
 		}
-		cout << "fel" << endl;
 		return false;
 	}
 
@@ -218,7 +203,7 @@ cout << chtitle << endl;
 		if(artPath == "./root/"){
 			return false;
 		} else if (newsgroups[newsgroupID].articles.erase(articleID)) {
-			artPath += to_string(articleID);
+			artPath += "/" + to_string(articleID);
 			const char* cPath = artPath.c_str();
 			remove(cPath);
 			return true;

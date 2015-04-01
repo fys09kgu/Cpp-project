@@ -11,12 +11,33 @@ using namespace std;
 
 void printHelp(int);
 
+void listArticles(MessageHandler msgHandler, uint nbr){
+	msgHandler.sendCode(Protocol::COM_LIST_ART);
+	msgHandler.sendIntParameter(nbr);
+	msgHandler.sendCode(Protocol::COM_END);
+	msgHandler.recvCode();
+	if (msgHandler.recvCode() == Protocol::ANS_ACK) {
+		int nbrOfArticles = msgHandler.recvIntParameter();
+		cout << "Articles: \n" << endl;
+		for (int i = 0; i < nbrOfArticles; i++) {
+			cout << "Id: " << msgHandler.recvIntParameter();
+			cout << ", Name: " << msgHandler.recvStringParameter() << endl;
+		}
+
+	} else {
+ 		msgHandler.recvCode();
+ 		cout << "No such Newsgroup" << endl;
+ 	}
+	msgHandler.recvCode();
+}
+
+
 int main(int argc, char* argv[]) {
-//	MessageHandler msgHandler(nullptr);
 	if (argc != 3) {
 		cerr << "Wrong input" << endl;
 		exit(1);
  	}
+
 	Connection conn(argv[1], stoi(argv[2]));		
 
 	if (!conn.isConnected()) {
@@ -34,6 +55,9 @@ int main(int argc, char* argv[]) {
  	string line;
 	printHelp(state);
  	while (getline(cin, line)) {
+		int counter = 0;
+		cout << ++counter << endl;
+		
  		istringstream iss(line);
 
  		string input;
@@ -42,9 +66,10 @@ int main(int argc, char* argv[]) {
  		if (input == "help") {	
  			printHelp(state);
  		} else if (input == "list") {
-
+			cout << ++counter << endl;
  			if (state == START_SCREEN) {
- 				msgHandler.sendCode(Protocol::COM_LIST_NG);
+				cout << ++counter << endl; 			
+				msgHandler.sendCode(Protocol::COM_LIST_NG);
  				msgHandler.sendCode(Protocol::COM_END);
  				msgHandler.recvCode();
  				int nbrOfGroups = msgHandler.recvIntParameter();
@@ -55,29 +80,8 @@ int main(int argc, char* argv[]) {
 					cout << ", Name: " << msgHandler.recvStringParameter() << endl;
  				}
  				msgHandler.recvCode();
- 			} else {
- 				msgHandler.sendCode(Protocol::COM_LIST_ART);
- 				msgHandler.sendInt(state);
- 				msgHandler.sendCode(Protocol::COM_END);
-
- 				msgHandler.recvCode();
- 				if (msgHandler.recvCode() == Protocol::ANS_ACK) {
-
- 					int nbrOfArticles = msgHandler.recvInt();
-
- 					cout << "Articles: \n" << endl;
- 					for (int i = 0; i < nbrOfArticles; i++) {
- 						cout << "Id: " << msgHandler.recvIntParameter() << ", Name: \
- 						" << msgHandler.recvStringParameter() << endl;
- 					}
-
- 					msgHandler.recvCode();
- 				} else {
- 					msgHandler.recvCode();
- 					cout << "No such Newsgroup" << endl;
- 				}
-
- 				msgHandler.recvCode();
+			} else {
+ 				listArticles(msgHandler, state);
  			}
 
  		} else if (input == "create") {
@@ -93,35 +97,40 @@ int main(int argc, char* argv[]) {
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
  					cout << "Newsgroup already exist" << endl;
  				}
- 				msgHandler.recvCode();
+ 				
 
  			} else {
+
+				cout << " apa " << endl;
  				msgHandler.sendCode(Protocol::COM_CREATE_ART);
- 				msgHandler.sendInt(state);
-
+ 				msgHandler.sendIntParameter(state);
+					
  				iss >> input;
  				msgHandler.sendStringParameter(input);
-
+				cout << input << endl;
  				iss >> input;
  				msgHandler.sendStringParameter(input);
- 				
+ 				cout << input << endl;
  				iss >> input;
  				msgHandler.sendStringParameter(input);
-
+				cout << input << endl;
  				msgHandler.sendCode(Protocol::COM_END);
 
  				msgHandler.recvCode();
  				if (msgHandler.recvCode() != Protocol::ANS_ACK) {
  					cout << "Newsgroup doesnt exist" << endl;
- 				}
- 				msgHandler.recvCode();
+ 				}else{
+					cout << "Article created" << endl;				
+				}
+			
  			}
+		msgHandler.recvCode();
  		} else if (input ==  "delete") {
  			if (state == START_SCREEN) {
  				msgHandler.sendCode(Protocol::COM_DELETE_NG);
 
  				iss >> input;
- 				msgHandler.sendInt(stoi(input));
+ 				msgHandler.sendIntParameter(stoi(input));
 
  				msgHandler.sendCode(Protocol::COM_END);
 
@@ -132,10 +141,10 @@ int main(int argc, char* argv[]) {
  				msgHandler.recvCode();
  			} else {
  				msgHandler.sendCode(Protocol::COM_DELETE_ART);
- 				msgHandler.sendInt(state);
+ 				msgHandler.sendIntParameter(state);
 
  				iss >> input;
- 				msgHandler.sendInt(stoi(input));
+ 				msgHandler.sendIntParameter(stoi(input));
 
  				msgHandler.sendCode(Protocol::COM_END);
 
@@ -153,11 +162,10 @@ int main(int argc, char* argv[]) {
 
  		} else if (input == "read") {
  			msgHandler.sendCode(Protocol::COM_GET_ART);
- 			msgHandler.sendInt(state);
+ 			msgHandler.sendIntParameter(state);
  			iss >> input;
- 			msgHandler.sendInt(stoi(input));
+ 			msgHandler.sendIntParameter(stoi(input));
  			msgHandler.sendCode(Protocol::COM_END);
-
  			msgHandler.recvCode();
 
  			if (msgHandler.recvCode() == Protocol::ANS_ACK) {
@@ -182,12 +190,17 @@ int main(int argc, char* argv[]) {
  			state = START_SCREEN;
  		}else if (input == "open") {
  			iss >> input;
- 			state = stoi(input);
- 		} else {
+			try {
+	 			state = stoi(input);	
+			} catch(std::invalid_argument&) {
+				cout << "Not a number, try again, syntax: open <ID>" << endl;
+			}
+
+		listArticles(msgHandler, state);
+
+		} else {
  			cout << "No such command, write help for available commands" << endl;
-
  		} 
-
  	} 
 
 	return 0;
@@ -196,8 +209,8 @@ int main(int argc, char* argv[]) {
 void printHelp(int state) {
 	if (state == START_SCREEN) { 
 		cout << "-- Usenet client -- \n \n \
-		Commands: \n list - Lists all newsgroups \n create [newsgroup] - Create new newsgroup \n \
-		delete [newsgroup] - Delete newsgroup \n open [newsgroup] - View content of newsgroup" << endl;
+		Commands: \n list - Lists all newsgroups \n create [newsgroup name] - Create new newsgroup \n \
+		delete <newsgroup ID> - Delete newsgroup \n open <newsgroup ID> - View content of newsgroup" << endl;
 	} else { 		
 		cout << "-- Usenet client -- \n \n \
 		Commands: \n list - List all articles \n create [article] - Create new article \n \

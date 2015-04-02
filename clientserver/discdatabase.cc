@@ -177,11 +177,15 @@ using namespace std;
 	}
 
 	bool DiscDatabase::removeNewsgroup(uint newsgroupID){
+		if (newsgroups.find(newsgroupID) != newsgroups.end()) {
 		string ngPath = getNewsgroupPath(newsgroupID);
+		
 		if(ngPath == "./root/"){
+
 			return false;
-		}else if(newsgroups.erase(newsgroupID)){
+		}else {
 			DIR* pdir;
+			newsgroups.erase(newsgroupID);
 			const char* cPath = ngPath.c_str();
 			pdir=opendir(cPath);
 			struct dirent* file;
@@ -191,24 +195,33 @@ using namespace std;
 				remove(filePath.c_str());
 			}
 
-cout << cPath << endl;
+			cout << cPath << endl;
 			rmdir(cPath);
 			return true;
 		}
+	}
 		return false;
 	}
 
 	bool DiscDatabase::removeArticle(uint newsgroupID, uint articleID){	
-		string artPath = getNewsgroupPath(newsgroupID);
-		if(artPath == "./root/"){
+		if (newsgroups.find(newsgroupID) != newsgroups.end()) {
+			string artPath = getNewsgroupPath(newsgroupID);
+			if(artPath == "./root/"){
+				return false;
+			} else {
+				if (newsgroups[newsgroupID].articles.find(articleID) != newsgroups[newsgroupID].articles.end()) {
+					newsgroups[newsgroupID].articles.erase(articleID);
+					artPath += "/" + to_string(articleID);
+					const char* cPath = artPath.c_str();
+					remove(cPath);
+					return true;
+				} else {
+					return false;
+				}
+			}
+		} else {
 			return false;
-		} else if (newsgroups[newsgroupID].articles.erase(articleID)) {
-			artPath += "/" + to_string(articleID);
-			const char* cPath = artPath.c_str();
-			remove(cPath);
-			return true;
 		}
-			return false;
 	}
 
 

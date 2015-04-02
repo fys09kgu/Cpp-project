@@ -17,14 +17,12 @@ CXXFLAGS += -g
 #CPPFLAGS =  -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 
-all: libclientserver.a client
+all: client
 
 # Create the library; ranlib is for Darwin (OS X) and maybe other systems.
 # Doesn't seem to do any damage on other systems.
 
-libclientserver.a: connection.o server.o
-	ar rv libclientserver.a  connection.o server.o
-	ranlib libclientserver.a
+
 client: client.o messagehandler.o connection.o
 
 #memorydatabase: database.o memorydatabase.o
@@ -34,7 +32,7 @@ client: client.o messagehandler.o connection.o
 
 # Standard clean
 clean:
-	rm -f *.o libclientserver.a
+	rm -f *.o
 
 # Generate dependencies in *.d files
 %.d: %.cc

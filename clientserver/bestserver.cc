@@ -152,7 +152,7 @@ int main(int argc, char* argv[]){
 						} else {		
 							msghandler.sendCode(Protocol::ANS_NAK);
 
-							if(grpid < database.getNewsgroupCount()) { 
+							if(grpid > database.getNewsgroupCount()) { 
 								msghandler.sendCode(Protocol::ERR_NG_DOES_NOT_EXIST);
 							} else {
 								msghandler.sendCode(Protocol::ERR_ART_DOES_NOT_EXIST);
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]){
 						} else {
 							msghandler.sendCode(Protocol::ANS_NAK);
 							
-							if(grpid < database.getNewsgroupCount()) { 
+							if(grpid > database.getNewsgroupCount()) { 
 								msghandler.sendCode(Protocol::ERR_NG_DOES_NOT_EXIST);
 							} else {
 								msghandler.sendCode(Protocol::ERR_ART_DOES_NOT_EXIST);

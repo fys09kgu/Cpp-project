@@ -111,6 +111,7 @@ void deleteNewsgroup(MessageHandler msgHandler, int groupId) {
 	msgHandler.recvCode();
 	if (msgHandler.recvCode() != Protocol::ANS_ACK) {
 		cout << "Newsgroup doesnt exist" << endl;
+		msgHandler.recvCode();
 	} else {
 		cout << "Newsgroup deleted" << endl;
 	}
@@ -127,6 +128,7 @@ void deleteArticle(MessageHandler msgHandler, int groupId, int articleId) {
 	if (msgHandler.recvCode() != Protocol::ANS_ACK) {
 		if (msgHandler.recvCode() == Protocol::ERR_NG_DOES_NOT_EXIST) {
 			cout << "Newsgroup doesnt exist" << endl;
+			msgHandler.recvCode();
 		} else {
 			cout << "Article doesnt exist" << endl;
 		}

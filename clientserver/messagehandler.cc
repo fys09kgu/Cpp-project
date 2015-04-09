@@ -35,22 +35,14 @@ int MessageHandler::recvInt() {
 	int b3 = recvByte();
 	int b4 = recvByte();
 
-//	std::cout << b1 << " " << b2 << " " << b3 << " " << b4 << std::endl;
 	return b1 << 24 | b2 << 16 | b3 << 8 | b4;
 }
-
-//Maybe throw exception
 int MessageHandler::recvIntParameter() {
-		//Check code??
 	int code = recvCode();
-//	std::cout << code << std::endl;
 	return recvInt();	
 }
 
-//throw excep?
 std::string MessageHandler::recvStringParameter() {
-
-	//Check code??
 	int code = recvCode();
 	int n = recvInt();
 	std::string parameter = "";

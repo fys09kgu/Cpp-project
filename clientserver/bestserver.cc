@@ -1,11 +1,9 @@
-
 #include "server.h"
 #include "connection.h"
 #include "connectionclosedexception.h"
 #include "memorydatabase.h"
 #include "messagehandler.h"
 #include "protocol.h"
-
 #include <memory>
 #include <iostream>
 #include <string>
@@ -15,10 +13,9 @@
 
 using namespace std;
 
-
 int main(int argc, char* argv[]){
 	
-
+	// Number of arguments sufficient?
 	if(argc != 2) { 
 		cerr << "Usage: bestserver <port-number>" << endl;
 		exit(1);
@@ -46,7 +43,9 @@ int main(int argc, char* argv[]){
 			try {
 				MessageHandler msghandler(conn);
 				int code = msghandler.recvCode();
+				// Handle messages from messagehandler
 				switch(code){
+					// List newsgroups
 					case Protocol::COM_LIST_NG:
 						{
 						msghandler.recvCode();
@@ -64,7 +63,7 @@ int main(int argc, char* argv[]){
 
 						break;
 						}
-
+					// Create newsgroup
 					case Protocol::COM_CREATE_NG:
 						{
 						string grpname = msghandler.recvStringParameter();
@@ -79,7 +78,7 @@ int main(int argc, char* argv[]){
 						msghandler.sendCode(Protocol::ANS_END);
 						break;
 						}
-					// 3
+					// Delete newsgroup
 					case Protocol::COM_DELETE_NG:
 						{
 						int grpnr = msghandler.recvIntParameter();
@@ -94,7 +93,7 @@ int main(int argc, char* argv[]){
 						msghandler.sendCode(Protocol::ANS_END);			
 						break;
 						}					
-					// 4
+					// List articles
 					case Protocol::COM_LIST_ART:
 						{
 						uint index = msghandler.recvIntParameter();
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]){
 						msghandler.sendCode(Protocol::ANS_END);
 						break;		
 						}
-					// 5
+					// Create article
 					case Protocol::COM_CREATE_ART:
 						{
 						uint id = msghandler.recvIntParameter();
@@ -138,7 +137,7 @@ int main(int argc, char* argv[]){
 						msghandler.sendCode(Protocol::ANS_END);
 						break;
 						}
-					// 6
+					// Delete article
 					case Protocol::COM_DELETE_ART:
 						{
 						uint grpid = msghandler.recvIntParameter();
@@ -162,6 +161,7 @@ int main(int argc, char* argv[]){
 						msghandler.sendCode(Protocol::ANS_END);
 						break;
 						}
+					// Get article
 					case Protocol::COM_GET_ART:
 						{
 						uint grpid = msghandler.recvIntParameter();

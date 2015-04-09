@@ -104,7 +104,6 @@ int main(int argc, char* argv[]){
 						if (newsgrps.count(index) != 0) {
 							msghandler.sendCode(Protocol::ANS_ACK);
 							
-						//	map<uint, Article> articles = newsgrps[index].articles;
 							msghandler.sendIntParameter(newsgrps[index].articles.size());
 							for_each(newsgrps[index].articles.begin(), newsgrps[index].articles.end(), [&](pair<const uint, Article>& art){
 								msghandler.sendIntParameter(art.first);

@@ -14,19 +14,21 @@
 
 using namespace std;
 	
+	// Constructor. Reads inputs all the newsgroups and articels into the memory.
 	DiscDatabase::DiscDatabase(){
 		DIR* pdir;		
 		pdir=opendir("./root");
 		if(!pdir){
-			mkdir("root", S_IRWXU | S_IRWXG | S_IRWXO);
+			mkdir("root", S_IRWXU | S_IRWXG | S_IRWXO); // Second input sets privileges.
 			pdir=opendir("./root");
 		}
+
 		DIR* cdir;
 		struct dirent *art;
 		fstream fs;
 		struct dirent *pent;
 		unsigned char isFolder =0x4;	
-		readdir(pdir); // Läs katalogen två gånger för att undvika . och ..
+		readdir(pdir); // Read path twice in order to avoid .. and .
 		readdir(pdir);  
 		while ((pent=readdir(pdir))){
 
@@ -37,15 +39,16 @@ using namespace std;
 				string name = fullName.substr(index+1);
 				Newsgroup gr;
 				gr.title = name;
-				//newsgroups.insert(make_pair(id, gr));
+
 				char dirpath[256];
 				strcpy (dirpath, "./root/");
 				strcat (dirpath, pent->d_name);
 				cdir = opendir(dirpath);
 
-				readdir(cdir); // Läs katalogen två gånger för att undvika . och ..
+				readdir(cdir); // Read path twice in order to avoid .. and .
 				readdir(cdir); 
-				while((art = readdir(cdir))){
+				// Get saved articles from newsgroup
+				while((art = readdir(cdir))){ 
 					string artName(art->d_name);
 					if(artName == "nextID"){
 						fs.open("./root/" + fullName + "/nextID");
@@ -58,7 +61,7 @@ using namespace std;
 					}else{
 						fs.open("./root/" + fullName + "/" + artName);
 						Article article;
-						getline(fs, article.title); // Läs två gånger för att undvika . och ..
+						getline(fs, article.title); 
 						getline(fs, article.author);
 						string text;
 						while(getline(fs, text)){
@@ -72,6 +75,8 @@ using namespace std;
 	 	}
 	}
 					
+		// Get the next id for newsgroups,
+		// the ID is saved in a file, if it doesn't exist, create new file.
 		fstream fs2;		
 		fs.open("./root/nextID");
 		if(fs.is_open()){
@@ -87,14 +92,15 @@ using namespace std;
 		fs.close();
 	}
 
-
+	//Add newsgroup by name, ID will automatically be set.
+	// Returns true if newsgroup was added. 
 	bool DiscDatabase::addNewsgroup(std::string title){
 		string temptitle;
 		temptitle = (to_string(getID()) + "_" + title);
 		for(auto it = newsgroups.begin(); it != newsgroups.end(); ++ it) {
 			Newsgroup gr = it->second;
 			string str = gr.title;
-			if (str==title) return false; 			
+			if (str==title) return false; // newsgroup allready exists  			
 		}
 
 		const char* chtitle = ("./root/" + temptitle).c_str();
@@ -112,8 +118,7 @@ using namespace std;
 		Newsgroup ng;
 		ng.title = title;
 		newsgroups.insert(make_pair(getID()-1,ng));
-
-				
+		// Save next article ID (0) for a new newsgroup 	
 		ofstream ofs;
 		ofs.open("./root/" + temptitle + "/nextID");
 		ofs << 0;
@@ -122,6 +127,7 @@ using namespace std;
 		return true;
 	}	
 
+	// Returns path name for the newsgroup with ID id.
 	string getNewsgroupPath(uint id){
 		DIR* pdir;
 		struct dirent *pent;
@@ -135,20 +141,20 @@ using namespace std;
 		}
 	} 
 
-
-
+	// Add new article with title, author and text to newsgroup with ID newsgroupID.
+	// Returns true if successfully created, returns false if newsgroup was not found
 	bool DiscDatabase::addArticle(uint newsgroupID, std::string title, std::string author, std::string text){
-			
 			Article ar;	
 			ar.title = title;
 			ar.author = author;
 			ar.text = text;
 			
 			if(getNewsgroup(newsgroupID) != nullptr){
+				// Insert artice in newsgroup
 				newsgroups[newsgroupID].articles.insert(make_pair(newsgroups[newsgroupID].nextArtID, ar));
 				++newsgroups[newsgroupID].nextArtID;
+				// Path to newsgroup
 				string ngPath = "./root/" + to_string(newsgroupID) + "_" + newsgroups[newsgroupID].title + "/";
-				
 				fstream fs;
 				fs.open(ngPath + "nextID");
 			
@@ -157,7 +163,7 @@ using namespace std;
 					fs >> id;
 					setID(stoi(id));
 					incID();
-					fs << to_string(getID());
+					fs << to_string(getID()); // save ID
 				}else{
 					return false;
 				}
@@ -171,30 +177,30 @@ using namespace std;
 				ofs.close();
 				return true;
 			}
-
-
-		return false;
+	
+		return false; // newsgroup not found
 	}
 
+	// Remove newsgroup with ID newsgroupID
+	// Returns true if successfully removed.	
 	bool DiscDatabase::removeNewsgroup(uint newsgroupID){
 		if (newsgroups.find(newsgroupID) != newsgroups.end()) {
 		string ngPath = getNewsgroupPath(newsgroupID);
 		
-		if(ngPath == "./root/"){
-
-			return false;
-		}else {
+		if(ngPath == "./root/") {
+			return false; // do not remove root, please
+		} else {
 			DIR* pdir;
 			newsgroups.erase(newsgroupID);
 			const char* cPath = ngPath.c_str();
 			pdir=opendir(cPath);
 			struct dirent* file;
 			string filePath;
-			while((file=readdir(pdir))){
+			// Directory has to be empty before removing a folder
+			while((file = readdir(pdir))){
 				filePath = ngPath + "/" + file->d_name;
 				remove(filePath.c_str());
 			}
-
 			cout << cPath << endl;
 			rmdir(cPath);
 			return true;
@@ -203,11 +209,13 @@ using namespace std;
 		return false;
 	}
 
+	// Remove article with ID articleID in newsgroup with ID newsgroupID.
+	// Returns true if successfully removed.
 	bool DiscDatabase::removeArticle(uint newsgroupID, uint articleID){	
 		if (newsgroups.find(newsgroupID) != newsgroups.end()) {
 			string artPath = getNewsgroupPath(newsgroupID);
-			if(artPath == "./root/"){
-				return false;
+			if(artPath == "./root/"){ // No articles here
+				return false;  
 			} else {
 				if (newsgroups[newsgroupID].articles.find(articleID) != newsgroups[newsgroupID].articles.end()) {
 					newsgroups[newsgroupID].articles.erase(articleID);
@@ -216,7 +224,7 @@ using namespace std;
 					remove(cPath);
 					return true;
 				} else {
-					return false;
+					return false; // Article not found
 				}
 			}
 		} else {
@@ -224,27 +232,27 @@ using namespace std;
 		}
 	}
 
-
+	// Check if article exists in a newsgroup
 	bool DiscDatabase::articleExists(uint newsgroupID, uint articleID){		
 		return newsgroups[newsgroupID].articles.count(articleID) != 0;
 	}		
 	
-
-
+	// Returns an article in a newsgroup
 	Article DiscDatabase::getArticle(uint newsgroupID, uint articleID){
 		return newsgroups[newsgroupID].articles[articleID];
 	}		
 	
+	// Returns all newsgroups
 	std::map<uint, Newsgroup> DiscDatabase::getNewsgroups(){
 		return newsgroups; 	
-}
+	}
 
-
+	// Returns the newgroup size
 	uint DiscDatabase::getNewsgroupCount(){
 		return newsgroups.size();
+	}
 
-}
-
+	// Returns pointer to a newsgroup with ID
 	Newsgroup* DiscDatabase::getNewsgroup(uint ID){
 		Newsgroup* ptr = nullptr;
 		if(newsgroups.count(ID) != 0){
@@ -253,12 +261,3 @@ using namespace std;
 		return ptr;		
 	}
 
-
-
-	bool fileExists (const std::string& name) {
-    	if (FILE *file = fopen(name.c_str(), "r")) {
-        	fclose(file);
-       		return true;
-    	}
-        return false;
-	}
